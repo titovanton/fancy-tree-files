@@ -11,11 +11,12 @@ let fromFlatToFancySource = function(childList, expandedList) {
 
   // Pass 1: store all items in reference map
   $.each(childList, function(index, child){
-    nodeMap[child._id] = child;
+    // nodeMap[child._id] = child;
+    nodeMap[child.path] = child;
   });
 
   // Pass 2: adjust fields and fix child structure
-  childList = $.map(childList, function(child){
+  childList = $.map(childList, function(child) {
 
     // Rename 'key' to 'id'
     child.key = child._id._str;

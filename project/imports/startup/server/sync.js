@@ -106,10 +106,81 @@ export const fromDBtoFS = (path = sharedFolder, collection = FilesTree) => {
   });
 }
 
-export const watcher = (folder = sharedFolder) => {
-  lib.chokidar
-    .watch(folder, {ignored: /[\/\\]\./})
-    .on('all', (event, path) => {
-      console.log(event, path);
-    });
+/**
+ * While fs lib does not support good watch method:
+ * https://nodejs.org/api/fs.html#fs_caveats
+ * we have to use(on Linux) inotify-tools and node api to that(chokidar):
+ * https://github.com/paulmillr/chokidar
+ * This function runs watcher on the folder and binds change events recursively.
+ * @param folderPath a string argument
+ * @param collection an collection object
+ * @return nothing
+ */
+export const watcher = (folderPath = sharedFolder, collection = FilesTree) => {
+  // on start lets sync root folder
+  // const updatedId = findOneAndUpdate(
+  //   collection,
+  //   {path: '/'},
+  //   {title: sharedTitle, path: '/', expanded: true, folder: true}
+  // );
+
+  const watcher = lib.chokidar.watch(folderPath, {ignored: /[\/\\]\./});
+  // while .on method is async, it is required to wrapp method with Meteor.wrapAsync
+  const syncOn = Meteor.wrapAsync(watcher.on, watcher);
+
+  syncOn('addDir', (path, stats) => {
+    // Object {name, parent, path}
+    let fileObj = Object.create(null);
+
+    fileObj.title = lib.path.basename(path);
+
+    if (folderPath == path) {
+      fileObj.path = '/';
+      fileObj.expanded = true;
+    } else {
+      fileObj.path = path.replace(folderPath, '');
+      const parent = lib.path.dirname(path);
+
+      if (folderPath == parent) {
+        fileObj.parent = '/';
+      } else {
+        fileObj.parent = parent.replace(folderPath, '');
+      }
+    }
+
+    fileObj.folder = true;
+
+    const updatedId = findOneAndUpdate(
+      collection,
+      {path: fileObj.path},
+      fileObj
+    );
+  });
+
+  syncOn('add', (path, stats) => {
+    // Object {name, parent, path}
+    let fileObj = Object.create(null);
+
+    fileObj.title = lib.path.basename(path);
+    fileObj.path = path.replace(folderPath, '');
+    const parent = lib.path.dirname(path);
+
+    if (folderPath == parent) {
+      fileObj.parent = '/';
+    } else {
+      fileObj.parent = parent.replace(folderPath, '');
+    }
+
+    fileObj.folder = false;
+
+    const updatedId = findOneAndUpdate(
+      collection,
+      {path: fileObj.path},
+      fileObj
+    );
+  });
+
+  syncOn('unlink', (path, stats) => {
+    collection.remove({path: path.replace(folderPath, '')});
+  });
 }
