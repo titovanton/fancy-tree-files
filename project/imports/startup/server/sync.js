@@ -117,13 +117,6 @@ export const fromDBtoFS = (path = sharedFolder, collection = FilesTree) => {
  * @return nothing
  */
 export const watcher = (folderPath = sharedFolder, collection = FilesTree) => {
-  // on start lets sync root folder
-  // const updatedId = findOneAndUpdate(
-  //   collection,
-  //   {path: '/'},
-  //   {title: sharedTitle, path: '/', expanded: true, folder: true}
-  // );
-
   const watcher = lib.chokidar.watch(folderPath, {ignored: /[\/\\]\./});
   // while .on method is async, it is required to wrapp method with Meteor.wrapAsync
   const syncOn = Meteor.wrapAsync(watcher.on, watcher);

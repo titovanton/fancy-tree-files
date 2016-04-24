@@ -1,5 +1,6 @@
 import { Meteor } from 'meteor/meteor';
 import { Template } from 'meteor/templating';
+import { check } from 'meteor/check';
 
 import { FilesTree } from '../../api/FilesTree.js';
 
@@ -10,7 +11,7 @@ let fromFlatToFancySource = function(childList, expandedList) {
   let nodeMap = {};
 
   // Pass 1: store all items in reference map
-  $.each(childList, function(index, child){
+  $.each(childList, function(index, child) {
     // nodeMap[child._id] = child;
     nodeMap[child.path] = child;
   });
@@ -19,7 +20,13 @@ let fromFlatToFancySource = function(childList, expandedList) {
   childList = $.map(childList, function(child) {
 
     // Rename 'key' to 'id'
-    child.key = child._id._str;
+    try {
+      check(child._id, {str: String});
+      child.key = child._id._str;
+    } catch(e) {
+      child.key = child._id;
+    }
+
     delete child._id;
 
     // asigne expanded
@@ -80,18 +87,16 @@ Template.fancytree.helpers({
   initFancyTree() {
     const $treeObj = $('#treeObj');
 
-    if ( $treeObj.data('expandedList') ) {
-
+    if ($treeObj.data('expandedList')) {
       // it was initiated once
       $treeObj.fancytree('destroy');
     } else {
-
       // default value for expanded nodes list
       $treeObj.data('expandedList', []);
     }
 
     const cursor = FilesTree.find({});
-    const data = fancyData( cursor.fetch(), $treeObj.data('expandedList') );
+    const data = fancyData(cursor.fetch(), $treeObj.data('expandedList'));
     $treeObj.fancytree(data);
   }
 });
