@@ -1,0 +1,12 @@
+{
+  "name": "project",
+  "private": true,
+  "scripts": {
+    "start": "meteor run"
+  },
+  "dependencies": {
+    "chokidar": "^1.4.3",
+    "jquery.fancytree": "^2.17.0",
+    "meteor-node-stubs": "~0.2.0"
+  }
+}

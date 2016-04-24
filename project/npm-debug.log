@@ -1,0 +1,144 @@
+0 info it worked if it ends with ok
+1 verbose cli [ 'node',
+1 verbose cli   '/home/vagrant/.meteor/packages/meteor-tool/.1.3.2_4.lpridz++os.linux.x86_64+web.browser+web.cordova/mt-os.linux.x86_64/dev_bundle/bin/npm',
+1 verbose cli   'install',
+1 verbose cli   '--save',
+1 verbose cli   'fsevents' ]
+2 info using npm@2.14.22
+3 info using node@v0.10.43
+4 verbose install initial load of /vagrant/project/package.json
+5 verbose installManyTop reading scoped package data from /vagrant/project/node_modules/chokidar/package.json
+6 verbose installManyTop reading scoped package data from /vagrant/project/node_modules/jquery.fancytree/package.json
+7 verbose installManyTop reading scoped package data from /vagrant/project/node_modules/meteor-node-stubs/package.json
+8 verbose readDependencies loading dependencies from /vagrant/project/package.json
+9 silly cache add args [ 'fsevents', null ]
+10 verbose cache add spec fsevents
+11 silly cache add parsed spec { raw: 'fsevents',
+11 silly cache add   scope: null,
+11 silly cache add   name: 'fsevents',
+11 silly cache add   rawSpec: '',
+11 silly cache add   spec: 'latest',
+11 silly cache add   type: 'tag' }
+12 silly addNamed fsevents@latest
+13 verbose addNamed "latest" is being treated as a dist-tag for fsevents
+14 info addNameTag [ 'fsevents', 'latest' ]
+15 silly mapToRegistry name fsevents
+16 silly mapToRegistry using default registry
+17 silly mapToRegistry registry https://registry.npmjs.org/
+18 silly mapToRegistry uri https://registry.npmjs.org/fsevents
+19 verbose addNameTag registry:https://registry.npmjs.org/fsevents not in flight; fetching
+20 verbose request uri https://registry.npmjs.org/fsevents
+21 verbose request no auth needed
+22 info attempt registry request try #1 at 19:48:21
+23 verbose request id 9bd9e364b73e6a3b
+24 verbose etag "8PVGYBXJZ0N7A0VP5BLLIVEG2"
+25 http request GET https://registry.npmjs.org/fsevents
+26 http 304 https://registry.npmjs.org/fsevents
+27 verbose headers { date: 'Sun, 24 Apr 2016 19:48:30 GMT',
+27 verbose headers   via: '1.1 varnish',
+27 verbose headers   'cache-control': 'max-age=300',
+27 verbose headers   etag: '"8PVGYBXJZ0N7A0VP5BLLIVEG2"',
+27 verbose headers   age: '176',
+27 verbose headers   connection: 'keep-alive',
+27 verbose headers   'x-served-by': 'cache-fra1241-FRA',
+27 verbose headers   'x-cache': 'HIT',
+27 verbose headers   'x-cache-hits': '6',
+27 verbose headers   'x-timer': 'S1461527310.007942,VS0,VE0',
+27 verbose headers   vary: 'Accept-Encoding' }
+28 silly get cb [ 304,
+28 silly get   { date: 'Sun, 24 Apr 2016 19:48:30 GMT',
+28 silly get     via: '1.1 varnish',
+28 silly get     'cache-control': 'max-age=300',
+28 silly get     etag: '"8PVGYBXJZ0N7A0VP5BLLIVEG2"',
+28 silly get     age: '176',
+28 silly get     connection: 'keep-alive',
+28 silly get     'x-served-by': 'cache-fra1241-FRA',
+28 silly get     'x-cache': 'HIT',
+28 silly get     'x-cache-hits': '6',
+28 silly get     'x-timer': 'S1461527310.007942,VS0,VE0',
+28 silly get     vary: 'Accept-Encoding' } ]
+29 verbose etag https://registry.npmjs.org/fsevents from cache
+30 verbose get saving fsevents to /home/vagrant/.npm/registry.npmjs.org/fsevents/.cache.json
+31 verbose correctMkdir /home/vagrant/.npm correctMkdir not in flight; initializing
+32 silly addNameTag next cb for fsevents with tag latest
+33 silly addNamed fsevents@1.0.11
+34 verbose addNamed "1.0.11" is a plain semver version for fsevents
+35 silly cache afterAdd fsevents@1.0.11
+36 verbose afterAdd /home/vagrant/.npm/fsevents/1.0.11/package/package.json not in flight; writing
+37 verbose correctMkdir /home/vagrant/.npm correctMkdir not in flight; initializing
+38 verbose afterAdd /home/vagrant/.npm/fsevents/1.0.11/package/package.json written
+39 silly install resolved [ { name: 'fsevents',
+39 silly install resolved     version: '1.0.11',
+39 silly install resolved     description: 'Native Access to Mac OS-X FSEvents',
+39 silly install resolved     main: 'fsevents.js',
+39 silly install resolved     dependencies: { nan: '^2.1.0', 'node-pre-gyp': '^0.6.25' },
+39 silly install resolved     os: [ 'darwin' ],
+39 silly install resolved     engines: { node: '>=0.8.0' },
+39 silly install resolved     scripts:
+39 silly install resolved      { install: 'node-pre-gyp install --fallback-to-build',
+39 silly install resolved        prepublish: 'if [ $(npm -v | head -c 1) -lt 3 ]; then exit 1; fi && npm dedupe',
+39 silly install resolved        test: 'tap ./test' },
+39 silly install resolved     binary:
+39 silly install resolved      { module_name: 'fse',
+39 silly install resolved        module_path: './lib/binding/{configuration}/{node_abi}-{platform}-{arch}/',
+39 silly install resolved        remote_path: './v{version}/',
+39 silly install resolved        package_name: '{module_name}-v{version}-{node_abi}-{platform}-{arch}.tar.gz',
+39 silly install resolved        host: 'https://fsevents-binaries.s3-us-west-2.amazonaws.com' },
+39 silly install resolved     repository:
+39 silly install resolved      { type: 'git',
+39 silly install resolved        url: 'git+https://github.com/strongloop/fsevents.git' },
+39 silly install resolved     keywords: [ 'fsevents', 'mac' ],
+39 silly install resolved     author: { name: 'Philipp Dunkel', email: 'pip@pipobscure.com' },
+39 silly install resolved     license: 'MIT',
+39 silly install resolved     bugs: { url: 'https://github.com/strongloop/fsevents/issues' },
+39 silly install resolved     homepage: 'https://github.com/strongloop/fsevents',
+39 silly install resolved     devDependencies: { tap: '~0.4.8' },
+39 silly install resolved     gitHead: '5f2622051aba3232a7a9ec09575ffcf9ea71ef06',
+39 silly install resolved     bundleDependencies: [ 'node-pre-gyp' ],
+39 silly install resolved     _id: 'fsevents@1.0.11',
+39 silly install resolved     _shasum: '303d4051e411a95a7ad187e6f8ccffe936ca78ac',
+39 silly install resolved     _from: 'fsevents@latest',
+39 silly install resolved     _npmVersion: '3.6.0',
+39 silly install resolved     _nodeVersion: '5.7.0',
+39 silly install resolved     _npmUser: { name: 'es128', email: 'elan.shanker+npm@gmail.com' },
+39 silly install resolved     dist:
+39 silly install resolved      { shasum: '303d4051e411a95a7ad187e6f8ccffe936ca78ac',
+39 silly install resolved        tarball: 'https://registry.npmjs.org/fsevents/-/fsevents-1.0.11.tgz' },
+39 silly install resolved     maintainers: [ [Object], [Object], [Object], [Object], [Object] ],
+39 silly install resolved     _npmOperationalInternal:
+39 silly install resolved      { host: 'packages-12-west.internal.npmjs.com',
+39 silly install resolved        tmp: 'tmp/fsevents-1.0.11.tgz_1459451879246_0.5843068221583962' },
+39 silly install resolved     directories: {},
+39 silly install resolved     _resolved: 'https://registry.npmjs.org/fsevents/-/fsevents-1.0.11.tgz',
+39 silly install resolved     readme: 'ERROR: No README data found!' } ]
+40 info install fsevents@1.0.11 into /vagrant/project
+41 info installOne fsevents@1.0.11
+42 verbose installOne of fsevents to /vagrant/project not in flight; installing
+43 verbose correctMkdir /home/vagrant/.npm/_locks correctMkdir not in flight; initializing
+44 verbose lock using /home/vagrant/.npm/_locks/fsevents-35364246f02fdd6c.lock for /vagrant/project/node_modules/fsevents
+45 verbose unlock done using /home/vagrant/.npm/_locks/fsevents-35364246f02fdd6c.lock for /vagrant/project/node_modules/fsevents
+46 verbose stack Error: Unsupported
+46 verbose stack     at checkPlatform (/home/vagrant/.meteor/packages/meteor-tool/.1.3.2_4.lpridz++os.linux.x86_64+web.browser+web.cordova/mt-os.linux.x86_64/dev_bundle/lib/node_modules/npm/node_modules/npm-install-checks/index.js:47:14)
+46 verbose stack     at Array.1 (/home/vagrant/.meteor/packages/meteor-tool/.1.3.2_4.lpridz++os.linux.x86_64+web.browser+web.cordova/mt-os.linux.x86_64/dev_bundle/lib/node_modules/npm/node_modules/slide/lib/bind-actor.js:15:8)
+46 verbose stack     at LOOP (/home/vagrant/.meteor/packages/meteor-tool/.1.3.2_4.lpridz++os.linux.x86_64+web.browser+web.cordova/mt-os.linux.x86_64/dev_bundle/lib/node_modules/npm/node_modules/slide/lib/chain.js:15:14)
+46 verbose stack     at /home/vagrant/.meteor/packages/meteor-tool/.1.3.2_4.lpridz++os.linux.x86_64+web.browser+web.cordova/mt-os.linux.x86_64/dev_bundle/lib/node_modules/npm/node_modules/slide/lib/chain.js:18:7
+46 verbose stack     at checkEngine (/home/vagrant/.meteor/packages/meteor-tool/.1.3.2_4.lpridz++os.linux.x86_64+web.browser+web.cordova/mt-os.linux.x86_64/dev_bundle/lib/node_modules/npm/node_modules/npm-install-checks/index.js:26:10)
+46 verbose stack     at Array.0 (/home/vagrant/.meteor/packages/meteor-tool/.1.3.2_4.lpridz++os.linux.x86_64+web.browser+web.cordova/mt-os.linux.x86_64/dev_bundle/lib/node_modules/npm/node_modules/slide/lib/bind-actor.js:15:8)
+46 verbose stack     at LOOP (/home/vagrant/.meteor/packages/meteor-tool/.1.3.2_4.lpridz++os.linux.x86_64+web.browser+web.cordova/mt-os.linux.x86_64/dev_bundle/lib/node_modules/npm/node_modules/slide/lib/chain.js:15:14)
+46 verbose stack     at chain (/home/vagrant/.meteor/packages/meteor-tool/.1.3.2_4.lpridz++os.linux.x86_64+web.browser+web.cordova/mt-os.linux.x86_64/dev_bundle/lib/node_modules/npm/node_modules/slide/lib/chain.js:20:5)
+46 verbose stack     at /home/vagrant/.meteor/packages/meteor-tool/.1.3.2_4.lpridz++os.linux.x86_64+web.browser+web.cordova/mt-os.linux.x86_64/dev_bundle/lib/node_modules/npm/lib/install.js:1038:5
+46 verbose stack     at /home/vagrant/.meteor/packages/meteor-tool/.1.3.2_4.lpridz++os.linux.x86_64+web.browser+web.cordova/mt-os.linux.x86_64/dev_bundle/lib/node_modules/npm/lib/utils/locker.js:39:7
+47 verbose pkgid fsevents@1.0.11
+48 verbose cwd /vagrant/project
+49 error Linux 3.13.0-77-generic
+50 error argv "node" "/home/vagrant/.meteor/packages/meteor-tool/.1.3.2_4.lpridz++os.linux.x86_64+web.browser+web.cordova/mt-os.linux.x86_64/dev_bundle/bin/npm" "install" "--save" "fsevents"
+51 error node v0.10.43
+52 error npm  v2.14.22
+53 error code EBADPLATFORM
+54 error notsup Unsupported
+54 error notsup Not compatible with your operating system or architecture: fsevents@1.0.11
+54 error notsup Valid OS:    darwin
+54 error notsup Valid Arch:  any
+54 error notsup Actual OS:   linux
+54 error notsup Actual Arch: x64
+55 verbose exit [ 1, true ]
