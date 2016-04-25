@@ -3,9 +3,9 @@
  */
 
 // import { fromFStoDB } from './sync.js';
-import { fromDBtoFS } from './sync.js';
-import { watcher } from './sync.js';
+// import { fromDBtoFS } from './sync.js';
+// import { watcher } from './sync.js';
 
 // fromFStoDB();
-fromDBtoFS();
-watcher();
+// fromDBtoFS();
+// watcher();

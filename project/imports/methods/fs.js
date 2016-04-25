@@ -1,12 +1,11 @@
 const fs = require('fs');
 
 import { Meteor } from 'meteor/meteor';
-// import { EJSON } from 'meteor/ejson'
+
+import { fromFStoDB } from '../fs/sync.js';
 
 Meteor.methods({
-  readdir() {
-    const lsResult = fs.readdirSync('/vagrant/folder');
-    return lsResult;
-    // return EJSON.stringify(lsResult);
+  uploadCallback() {
+    fromFStoDB();
   }
 });

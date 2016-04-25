@@ -10,7 +10,7 @@ const lib = {
   chokidar: require('chokidar')
 };
 
-import { FilesTree } from '../../api/FilesTree.js';
+import { FilesTree } from '../api/FilesTree.js';
 
 import { recursiveFolder } from './fs.api.js';
 
@@ -49,34 +49,33 @@ const findOneAndUpdate = (collection, filter, update) => {
  */
 export const fromFStoDB = (path = sharedFolder, collection = FilesTree) => {
   // maping path to mongo _id
-  let pathMap = Object.create(null);
   const updatedId = findOneAndUpdate(
     collection,
     {path: '/'},
     {title: sharedTitle, path: '/', expanded: true, folder: true}
   );
 
-  pathMap[sharedFolder] = updatedId;
-
   recursiveFolder(path, (name, absPath, parentDir, statsObj) => {
     // Object {name, parent, path}
     let fileObj = Object.create(null);
-    const isDirectory = statsObj.isDirectory();
+    const parent = lib.path.dirname(absPath).replace(path, '');
 
     fileObj.title = name;
     fileObj.path = absPath.replace(path, '');
-    fileObj.parent = pathMap[parentDir];
-    fileObj.folder = isDirectory;
+
+    if (parent) {
+      fileObj.parent = parent;
+    } else {
+      fileObj.parent = '/';
+    }
+
+    fileObj.folder = statsObj.isDirectory();
 
     const updatedId = findOneAndUpdate(
       collection,
       {path: fileObj.path},
       fileObj
     );
-
-    if (isDirectory) {
-      pathMap[absPath] = updatedId;
-    }
   });
 }
 
@@ -119,9 +118,9 @@ export const fromDBtoFS = (path = sharedFolder, collection = FilesTree) => {
 export const watcher = (folderPath = sharedFolder, collection = FilesTree) => {
   const watcher = lib.chokidar.watch(folderPath, {ignored: /[\/\\]\./});
   // while .on method is async, it is required to wrapp method with Meteor.wrapAsync
-  const syncOn = Meteor.wrapAsync(watcher.on, watcher);
+  const onSync = Meteor.wrapAsync(watcher.on, watcher);
 
-  syncOn('addDir', (path, stats) => {
+  onSync('addDir', (path, stats) => {
     // Object {name, parent, path}
     let fileObj = Object.create(null);
 
@@ -150,7 +149,7 @@ export const watcher = (folderPath = sharedFolder, collection = FilesTree) => {
     );
   });
 
-  syncOn('add', (path, stats) => {
+  onSync('add', (path, stats) => {
     // Object {name, parent, path}
     let fileObj = Object.create(null);
 
@@ -173,7 +172,7 @@ export const watcher = (folderPath = sharedFolder, collection = FilesTree) => {
     );
   });
 
-  syncOn('unlink', (path, stats) => {
+  onSync('unlink', (path, stats) => {
     collection.remove({path: path.replace(folderPath, '')});
   });
 }
