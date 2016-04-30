@@ -6,8 +6,8 @@
 // namespace for the libraries
 const lib = {
   fs: require('fs'),
-  path: require('path'),
-  chokidar: require('chokidar')
+  path: require('path')
+  // chokidar: require('chokidar')
 };
 
 import { FilesTree } from '../api/FilesTree.js';
@@ -48,12 +48,15 @@ const findOneAndUpdate = (collection, filter, update) => {
  * @return nothing
  */
 export const fromFStoDB = (path = sharedFolder, collection = FilesTree) => {
-  // maping path to mongo _id
-  const updatedId = findOneAndUpdate(
+  const affectedId = findOneAndUpdate(
     collection,
     {path: '/'},
     {title: sharedTitle, path: '/', expanded: true, folder: true}
   );
+
+  // maping path to mongo _id
+  const parentsMap = new Object(null);
+  parentsMap['/'] = affectedId;
 
   recursiveFolder(path, (name, absPath, parentDir, statsObj) => {
     // Object {name, parent, path}
@@ -64,18 +67,22 @@ export const fromFStoDB = (path = sharedFolder, collection = FilesTree) => {
     fileObj.path = absPath.replace(path, '');
 
     if (parent) {
-      fileObj.parent = parent;
+      fileObj.parent = parentsMap[parent];
     } else {
-      fileObj.parent = '/';
+      fileObj.parent = parentsMap['/'];
     }
 
     fileObj.folder = statsObj.isDirectory();
 
-    const updatedId = findOneAndUpdate(
+    const affectedId = findOneAndUpdate(
       collection,
       {path: fileObj.path},
       fileObj
     );
+
+    if (fileObj.folder) {
+      parentsMap[fileObj.path] = affectedId;
+    }
   });
 }
 
@@ -142,8 +149,7 @@ export const watcher = (folderPath = sharedFolder, collection = FilesTree) => {
 
     fileObj.folder = true;
 
-    const updatedId = findOneAndUpdate(
-      collection,
+    const updatedId = collection.upsert(
       {path: fileObj.path},
       fileObj
     );
@@ -165,8 +171,7 @@ export const watcher = (folderPath = sharedFolder, collection = FilesTree) => {
 
     fileObj.folder = false;
 
-    const updatedId = findOneAndUpdate(
-      collection,
+    const updatedId = collection.upsert(
       {path: fileObj.path},
       fileObj
     );

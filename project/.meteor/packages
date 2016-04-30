@@ -20,3 +20,5 @@ ecmascript              # Enable ECMAScript2015+ syntax in app code
 titovanton:fancy-tree
 reactive-dict
 session
+dbarrett:dropzonejs
+tomi:upload-server

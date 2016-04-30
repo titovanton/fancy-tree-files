@@ -1,2 +1,2 @@
-import '../imports/ui/layouts/body.js'
-import '../imports/ui/layouts/fancytree.js'
+import '../imports/ui/layouts/body.ui.js'
+import '../imports/ui/layouts/fancytree.ui.js'
