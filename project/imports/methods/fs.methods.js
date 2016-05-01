@@ -7,12 +7,14 @@ import { Meteor } from 'meteor/meteor';
 import { check } from 'meteor/check';
 
 import { fromFStoDB } from '../fs/sync.js';
+import { fromDBtoFS } from '../fs/sync.js';
 import { sharedFolder } from '../fs/sync.js';
 import { FilesTree } from '../api/FilesTree.js';
 
 Meteor.methods({
   uploadCallback() {
     fromFStoDB();
+    fromDBtoFS();
   },
 
   mv(keyNodeFrom, keyNodeTo) {

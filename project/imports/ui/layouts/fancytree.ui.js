@@ -6,7 +6,7 @@ import { FilesTree } from '../../api/FilesTree.js';
 
 import './fancytree.html'
 
-let fromFlatToFancySource = function(childList, expandedList) {
+let fromFlatToFancySource = function(childList, expandedList = []) {
   let parent;
   let nodeMap = {};
 
@@ -20,10 +20,8 @@ let fromFlatToFancySource = function(childList, expandedList) {
       child.key = child._id;
     }
 
-    child.class='asdf'
-
     delete child._id;
-
+    child.extraClasses = `key-${child.key}`;
     nodeMap[child.key] = child;
     // nodeMap[child.path] = child;
   });
@@ -31,9 +29,9 @@ let fromFlatToFancySource = function(childList, expandedList) {
   // Pass 2: adjust fields and fix child structure
   childList = $.map(childList, function(child) {
     // asigne expanded
-    if ( expandedList.indexOf(child.key) >= 0 ) {
-      child.expanded = true;
-    }
+    // if ( expandedList.indexOf(child.key) >= 0 ) {
+    //   child.expanded = true;
+    // }
 
     // Check if it is a child node
     if (child.parent) {
@@ -41,9 +39,9 @@ let fromFlatToFancySource = function(childList, expandedList) {
       // add child to `children` array of parent node
       parent = nodeMap[child.parent];
 
-      if (parent.children) {
+      if (parent && parent.children) {
         parent.children.push(child);
-      } else {
+      } else if (parent) {
         parent.children = [child];
       }
 
@@ -58,25 +56,14 @@ let fromFlatToFancySource = function(childList, expandedList) {
   return childList;
 }
 
-let fancyData = (source, expandedList) => {
+let fancyData = (source) => {
   return {
-    source: fromFlatToFancySource(source, expandedList),
-    extensions: ['dnd', 'filter'],
+    source: source,
+    extensions: ['dnd', 'filter', 'persist'],
 
-    click: function(event, data) {
-      const node = data.node;
-
-      if (node.folder) {
-        let expandedList = $(this).data('expandedList');
-
-        if (!node.expanded) {
-          expandedList.push(node.key);
-        } else {
-          expandedList.splice(expandedList.indexOf(node.key), 1);
-        }
-
-        $(this).data('expandedList', expandedList);
-      }
+    persist: {
+      expandLazy: false,
+      types: 'expanded'
     },
 
     dnd: {
@@ -123,34 +110,34 @@ Template.fancytree.onCreated(function() {
 });
 
 Template.fancytree.helpers({
-  initFancyTree() {
-    const $treeObj = $('#treeObj');
+  reloadFancyTree() {
+    const $tree = $('#tree');
+    const expandedList = $tree.data('expandedList');
+    const objectList = FilesTree.find({}).fetch();
+    const source = fromFlatToFancySource(objectList, expandedList);
 
-    if ($treeObj.data('expandedList')) {
-      // it was initiated once
+    if (!expandedList) {
 
       try {
-        $treeObj.fancytree('destroy');
-      } catch (err) {}
+        $tree.fancytree(fancyData(source));
+      } catch (e) {}
+
+      $tree.data('expandedList', []);
     } else {
-      // default value for expanded nodes list
-      $treeObj.data('expandedList', []);
+      const tree = $tree.fancytree('getTree');
+
+      try {
+        tree.reload(source);
+      } catch (e) {}
     }
 
-    const objectList = FilesTree.find({}).fetch();
-
-    try {
-      const data = fancyData(objectList, $treeObj.data('expandedList'));
-      $treeObj.fancytree(data);
-    } catch (err) {}
-
-    $('.fancytree-folder').dropzone({ url: "/upload/" });
+    // $('.fancytree-folder').dropzone({ url: "/upload/" });
   }
 });
 
 Template.fancytree.events({
   'keyup #search'(event, instance) {
-    const tree = $('#treeObj').fancytree('getTree');
+    const tree = $('#tree').fancytree('getTree');
 
     if (!event.target.value) {
       tree.clearFilter();
