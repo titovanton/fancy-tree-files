@@ -8,7 +8,7 @@ Package.describe({
 
 Package.onUse(function(api) {
   api.versionsFrom('1.3.1');
-  api.use('titovanton:jquery-custom', 'client');
+  api.use('titovanton:jquery-custom@2.2.3', 'client');
   api.addFiles('lib/jquery.cookie.min.js', 'client');
   api.addFiles('lib/jquery-ui.min.js', 'client');
   api.addAssets([
