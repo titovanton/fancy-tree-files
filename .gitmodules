@@ -1,0 +1,3 @@
+[submodule "project/packages/meteor-tomi-upload-server"]
+	path = project/packages/meteor-tomi-upload-server
+	url = https://github.com/titovanton/meteor-tomi-upload-server.git
