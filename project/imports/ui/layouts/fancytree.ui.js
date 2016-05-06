@@ -21,8 +21,8 @@ let fromFlatToFancySource = function(childList, expandedList = []) {
     }
 
     delete child._id;
-    child.extraClasses = `key-${child.key}`;
     nodeMap[child.key] = child;
+    // child.extraClasses = `key-${child.key}`;
     // nodeMap[child.path] = child;
   });
 
@@ -64,6 +64,38 @@ let fancyData = (source) => {
     persist: {
       expandLazy: false,
       types: 'expanded'
+    },
+
+    createNode: (event, data) => {
+      // create Dropzone objects for every folder
+      // if there is a goust of the Dropzone object, then delete it
+      const node = data.node;
+
+      if (node.folder) {
+        const key = node.key;
+        const nodePath = node.data.path;
+
+        if (Object.keys(dropzoneList).indexOf(key) + 1) {
+          dropzoneList[key].destroy();
+        }
+
+        dropzoneList[key] = new Dropzone(node.span, {
+          url: `/upload/?nodePath=${nodePath}`,
+          createImageThumbnails: false,
+          clickable: false,
+          previewsContainer: false,
+
+          init: function() {
+            this.on("sending", Meteor.wrapAsync((file, xhr, formData) => {
+              formData.set('fullPath', file.fullPath);
+            }));
+
+            // this.on("sendingmultiple", Meteor.wrapAsync((file, xhr, formData) => {
+            //   console.log("sendingmultiple", formData);
+            // }));
+          }
+        });
+      }
     },
 
     dnd: {
@@ -130,8 +162,6 @@ Template.fancytree.helpers({
         tree.reload(source);
       } catch (e) {}
     }
-
-    // $('.fancytree-folder').dropzone({ url: "/upload/" });
   }
 });
 
