@@ -1,1 +1,1 @@
-# Dropzone and UploadServer
+# Dropzone client lib.

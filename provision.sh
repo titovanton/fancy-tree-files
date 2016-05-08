@@ -53,3 +53,15 @@ mkdir -p /vagrant/project/imports/startup/server
 mkdir -p /vagrant/project/imports/ui/components
 mkdir -p /vagrant/project/imports/ui/layouts
 mkdir -p /vagrant/project/imports/ui/pages
+
+# custom packages tune
+meteor remove insecure
+meteor remove autopublish
+meteor remove jquery
+meteor add titovanton:jquery-custom
+meteor add titovanton:dropzone
+meteor add titovanton:fancy-tree
+meteor add tomi:upload-server
+
+echo "You need to run the following command:"
+echo "git submodule add https://github.com/titovanton/meteor-tomi-upload-server.git"

@@ -1,8 +1,8 @@
 Package.describe({
-  name: 'titovanton:dropzone-uploadserver',
-  version: '0.0.1',
+  name: 'titovanton:dropzone',
+  version: '0.0.2',
   // Brief, one-line summary of the package.
-  summary: 'Dropzone and UploadServer',
+  summary: 'Dropzone client lib.',
   // URL to the Git repository containing the source code for this package.
   git: '',
   // By default, Meteor will default to using README.md for documentation.
@@ -12,6 +12,5 @@ Package.describe({
 
 Package.onUse(function(api) {
   api.versionsFrom('1.3.1');
-  api.use('tomi:upload-server@1.3.3');
   api.addFiles('dropzone.js', 'client');
 });
