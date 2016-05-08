@@ -147,9 +147,9 @@ Template.fancytree.helpers({
     const expandedList = $tree.data('expandedList');
     const objectList = FilesTree.find({}).fetch();
     const source = fromFlatToFancySource(objectList, expandedList);
+    console.log(source)
 
     if (!expandedList) {
-
       try {
         $tree.fancytree(fancyData(source));
       } catch (e) {}

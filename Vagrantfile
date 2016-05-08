@@ -18,7 +18,7 @@ Vagrant.configure(2) do |config|
 
       v.customize [
         "modifyvm", :id,
-        "--name", "fancy-tree"
+        "--name", "fancy-tree1"
       ]
     end
 end

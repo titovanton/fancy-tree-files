@@ -39,29 +39,12 @@ echo $command >> /home/vagrant/.bashrc
 apt-get install -y inotify-tools
 
 # project
-cd /vagrant
-meteor create project
-# git clone https://github.com/titovanton/fancy-tree.git project
 cd /vagrant/project
 meteor npm install
 
-# project folders
-mkdir -p /vagrant/project/tests
-mkdir -p /vagrant/project/imports/api
-mkdir -p /vagrant/project/imports/startup/client
-mkdir -p /vagrant/project/imports/startup/server
-mkdir -p /vagrant/project/imports/ui/components
-mkdir -p /vagrant/project/imports/ui/layouts
-mkdir -p /vagrant/project/imports/ui/pages
+git submodule init
+git submodule update
 
-# custom packages tune
-# meteor remove insecure
-# meteor remove autopublish
-# meteor remove jquery
-# meteor add titovanton:jquery-custom
-# meteor add titovanton:dropzone
-# meteor add titovanton:fancy-tree
-# meteor add tomi:upload-server
-
-echo "You need to run the following command:"
-echo "git submodule add https://github.com/titovanton/meteor-tomi-upload-server.git"
+# echo "You need to run the following command:"
+# echo "git submodule init"
+# echo "git submodule update"
