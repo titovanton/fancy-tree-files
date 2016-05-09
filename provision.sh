@@ -35,8 +35,8 @@ sudo apt-get install -y mongodb-enterprise
 command="export MONGO_URL='mongodb://localhost:27017/fancy-tree'"
 echo $command >> /home/vagrant/.bashrc
 
-# inotify-tools
-apt-get install -y inotify-tools
+# # inotify-tools
+# apt-get install -y inotify-tools
 
 # project
 cd /vagrant/project
@@ -44,7 +44,3 @@ meteor npm install
 
 git submodule init
 git submodule update
-
-# echo "You need to run the following command:"
-# echo "git submodule init"
-# echo "git submodule update"

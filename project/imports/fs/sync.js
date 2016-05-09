@@ -10,12 +10,56 @@ const lib = {
   // chokidar: require('chokidar')
 };
 
+import { Meteor } from 'meteor/meteor';
+
 import { FilesTree } from '../api/FilesTree.js';
 
 import { recursiveFolder } from './fs.api.js';
 
 export const sharedFolder = '/home/vagrant/folder';
 export const sharedTitle = 'folder';
+
+/**
+ * Recives the document and uses parent attribute to generate path recursively.
+ * @param { MongoObject } document
+ * @param { MongoCollection } collection
+ * @param { Object } documentsMap - map _id to DB document, default - null
+ * @return { String } relative path
+ */
+export const relativePathOf = (document, collection = null, documentsMap = null) => {
+  if (!collection && !documentsMap) {
+    throw Meteor.Error('collection and documentsMap can not be null both.');
+  }
+
+  let relativePath = lib.path.join('/', document.title);
+  let tmp = document;
+
+  while (tmp.parent) {
+    if (documentsMap) {
+      tmp = documentsMap[tmp.parent];
+    } else {
+      tmp = collection.findOne({_id: tmp.parent});
+    }
+
+    relativePath = lib.path.join('/', tmp.title, relativePath);
+  }
+
+  return relativePath;
+}
+
+/**
+ * Makes result of invoking relativePathOf absolute.
+ * @param { MongoObject } document
+ * @param { MongoCollection } collection
+ * @param { Object } documentsMap - map _id to DB document, default - null
+ * @return { String } absolute path
+ */
+export const absPathOf = (document, collection = null, documentsMap = null) => {
+  return lib.path.join(
+    lib.path.dirname(sharedFolder),
+    relativePathOf(document, collection, documentsMap)
+  );
+}
 
 /**
  * While db.collection.findOneAndUpdate is not implemented in Meteor,
@@ -25,7 +69,7 @@ export const sharedTitle = 'folder';
  * @param collection - a collection object
  * @param filter - an object
  * @param update - an object.
- * @return updated/inserted document _id
+ * @return updated/inserted document
  */
 const findOneAndUpdate = (collection, filter, update) => {
   let document = collection.findOne(filter);
@@ -37,7 +81,7 @@ const findOneAndUpdate = (collection, filter, update) => {
     collection.update(filter, update);
   }
 
-  return document._id;
+  return document;
 }
 
 /**
@@ -48,40 +92,39 @@ const findOneAndUpdate = (collection, filter, update) => {
  * @return nothing
  */
 export const fromFStoDB = (path = sharedFolder, collection = FilesTree) => {
-  const affectedId = findOneAndUpdate(
+  const affected = findOneAndUpdate(
     collection,
-    {path: '/'},
-    {title: sharedTitle, path: '/', expanded: true, folder: true}
+    {parent: null, title: sharedTitle},
+    {parent: null, title: sharedTitle, expanded: true, folder: true}
   );
 
   // maping path to mongo _id
   const parentsMap = new Object(null);
-  parentsMap['/'] = affectedId;
+  const sharedFolderRelative = lib.path.join('/', sharedTitle);
+  parentsMap[sharedFolderRelative] = affected._id;
+
+  // to make relative path, replace the following
+  const absReplace = lib.path.dirname(path);
 
   recursiveFolder(path, (name, absPath, parentDir, statsObj) => {
-    // Object {name, parent, path}
+    // Object {title, parent, folder, expanded}
     let fileObj = Object.create(null);
-    const parent = lib.path.dirname(absPath).replace(path, '');
+    // const parent = lib.path.dirname(absPath).replace(path, '');
+    const parentPath = parentDir.replace(absReplace, '');
 
     fileObj.title = name;
-    fileObj.path = absPath.replace(path, '');
-
-    if (parent) {
-      fileObj.parent = parentsMap[parent];
-    } else {
-      fileObj.parent = parentsMap['/'];
-    }
-
+    fileObj.expanded = false;
+    fileObj.parent = parentsMap[parentPath];
     fileObj.folder = statsObj.isDirectory();
 
-    const affectedId = findOneAndUpdate(
+    const affected = findOneAndUpdate(
       collection,
-      {path: fileObj.path},
+      {parent: fileObj.parent, title: name},
       fileObj
     );
 
     if (fileObj.folder) {
-      parentsMap[fileObj.path] = affectedId;
+      parentsMap[absPath.replace(absReplace, '')] = affected._id;
     }
   });
 }
@@ -95,9 +138,18 @@ export const fromFStoDB = (path = sharedFolder, collection = FilesTree) => {
  */
 export const fromDBtoFS = (path = sharedFolder, collection = FilesTree) => {
   const allDocuments = collection.find({});
+  // map id to document
+  let documentsMap = Object.create(null);
 
   allDocuments.forEach((item, i, arr) => {
-    const absPath = lib.path.join(path, item.path);
+    documentsMap[item._id] = item;
+  });
+
+  const pathParent = lib.path.dirname(path);
+
+  // gousts checking
+  allDocuments.forEach((item, i, arr) => {
+    const absPath = absPathOf(item, null, documentsMap);
 
     // posix attributes
     try {

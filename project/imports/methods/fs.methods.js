@@ -9,37 +9,12 @@ import { check } from 'meteor/check';
 import { fromFStoDB } from '../fs/sync.js';
 import { fromDBtoFS } from '../fs/sync.js';
 import { sharedFolder } from '../fs/sync.js';
+import { relativePathOf } from '../fs/sync.js';
+import { absPathOf } from '../fs/sync.js';
 import { FilesTree } from '../api/FilesTree.js';
 
-Meteor.methods({
-  uploadCallback() {
-    fromFStoDB();
-    fromDBtoFS();
-  },
-
-  mv(keyNodeFrom, keyNodeTo) {
-    check(keyNodeTo, String);
-    check(keyNodeFrom, String);
-
-    const nodeFrom = FilesTree.findOne({_id: keyNodeFrom});
-    const nodeTo = FilesTree.findOne({_id: keyNodeTo});
-
-    if (!nodeTo.folder) {
-      throw new Meteor.Error(`The "${nodeTo.title}" should be a folder`);
-    }
-
-    let exists = FilesTree.findOne({
-      parent: nodeTo._id,
-      title: nodeFrom.title,
-      folder: nodeFrom.folder
-    });
-
-    if (exists) {
-      throw new Meteor.Error(
-        `The file "${exists.path}" exists. ` +
-        `Rename file first before moving.`
-      );
-    }
+// TODO: needs to be done
+const renameExists = () => {
 
     /** Auto rename a file if the same name exists in a destination folder
      * example: file.txt, file(1).txt, file(2).txt
@@ -74,18 +49,53 @@ Meteor.methods({
     //     folder: nodeFrom.folder
     //   });
     // }
+}
 
+Meteor.methods({
+  uploadCallback() {
+    fromFStoDB();
+    fromDBtoFS();
+  },
+
+  mv(keyNodeFrom, keyNodeTo) {
+    check(keyNodeTo, String);
+    check(keyNodeFrom, String);
+
+    // retreaving
+    const nodeFrom = FilesTree.findOne({_id: keyNodeFrom});
+    const nodeTo = FilesTree.findOne({_id: keyNodeTo});
+
+    // you can't move to not a folder
+    if (!nodeTo.folder) {
+      throw new Meteor.Error(`The "${nodeTo.title}" should be a folder`);
+    }
+
+    let exists = FilesTree.findOne({
+      parent: nodeTo._id,
+      title: nodeFrom.title,
+      folder: nodeFrom.folder
+    });
+
+    // you can't move if the same object with the same name exists in where you
+    // moving it
+    if (exists) {
+      const pathToExists = relativePathOf(exists, FilesTree);
+
+      throw new Meteor.Error(
+        `The file "${pathToExists}" exists. ` +
+        `Rename file first before moving.`
+      );
+    }
+
+    const oldPath = absPathOf(nodeFrom, FilesTree);
+
+    // update DB first
     nodeFrom.parent = nodeTo._id;
-    const oldPath = nodeFrom.path;
-    nodeFrom.path = lib.path.join(nodeTo.path, nodeFrom.title);
-
-    // updating DB index
     FilesTree.update({_id: nodeFrom._id}, nodeFrom);
 
+    const newPath = absPathOf(nodeFrom, FilesTree);
+
     // moving in File Syste
-    lib.fs.renameSync(
-      lib.path.join(sharedFolder, oldPath),
-      lib.path.join(sharedFolder, nodeFrom.path)
-    );
+    lib.fs.renameSync(oldPath, newPath);
   }
 });
