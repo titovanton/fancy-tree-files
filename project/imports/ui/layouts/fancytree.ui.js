@@ -67,19 +67,19 @@ let fancyData = (source) => {
     },
 
     createNode: (event, data) => {
-      // create Dropzone objects for every folder
-      // if there is a goust of the Dropzone object, then delete it
       const node = data.node;
 
+      // create Dropzone objects for every folder
+      // if there is a goust of the Dropzone object, then delete it
       if (node.folder) {
         const key = node.key;
         const nodePath = node.data.path;
 
-        if (Object.keys(dropzoneList).indexOf(key) + 1) {
-          dropzoneList[key].destroy();
+        if (Object.keys(window.dropzoneList).indexOf(key) + 1) {
+          window.dropzoneList[key].destroy();
         }
 
-        dropzoneList[key] = new Dropzone(node.span, {
+        window.dropzoneList[key] = new window.Dropzone(node.span, {
           url: `/upload/?nodePath=${nodePath}`,
           createImageThumbnails: false,
           clickable: false,
@@ -89,10 +89,6 @@ let fancyData = (source) => {
             this.on("sending", Meteor.wrapAsync((file, xhr, formData) => {
               formData.set('fullPath', file.fullPath);
             }));
-
-            // this.on("sendingmultiple", Meteor.wrapAsync((file, xhr, formData) => {
-            //   console.log("sendingmultiple", formData);
-            // }));
           }
         });
       }

@@ -21,4 +21,5 @@ reactive-dict
 session
 titovanton:jquery-custom
 tomi:upload-server
-titovanton:dropzone-uploadserver
+titovanton:dropzone
+titovanton:dropzone-startup
