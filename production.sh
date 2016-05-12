@@ -10,8 +10,6 @@ hostname fancy-tree
 echo "127.0.0.1 fancy-tree" >> /etc/hosts
 echo "fancy-tree" > /etc/hostname
 
-adduser --disabled-login fancytree
-
 # .bashrc
 echo "cd /fancytree/project" >> /home/fancytree/.bashrc
 
