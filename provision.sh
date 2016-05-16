@@ -15,6 +15,7 @@ echo "cd /vagrant/project" >> /home/vagrant/.bashrc
 
 # node
 apt-get autoremove -y node
+apt-get autoremove -y nodejs
 apt-get install -y build-essential
 curl -sL https://deb.nodesource.com/setup_4.x | bash -
 apt-get install -y nodejs

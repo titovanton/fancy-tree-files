@@ -17,6 +17,7 @@ import { FilesTree } from '../api/FilesTree.js';
 import { recursiveFolder } from './fs.api.js';
 
 export const sharedFolder = '/home/vagrant/folder';
+export const tempFolder = '/home/vagrant/temp';
 export const sharedTitle = 'folder';
 
 /**

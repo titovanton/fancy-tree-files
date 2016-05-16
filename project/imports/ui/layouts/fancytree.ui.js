@@ -1,3 +1,5 @@
+const pathLib = require('path');
+
 import { Meteor } from 'meteor/meteor';
 import { Template } from 'meteor/templating';
 import { check } from 'meteor/check';
@@ -60,35 +62,53 @@ let fancyData = (source) => {
   return {
     source: source,
     extensions: ['dnd', 'filter', 'persist'],
+    toggleEffect: false,
 
     persist: {
       expandLazy: false,
       types: 'expanded'
     },
 
-    createNode: (event, data) => {
+    createNode: function(event, data) {
       const node = data.node;
 
       // create Dropzone objects for every folder
       // if there is a goust of the Dropzone object, then delete it
       if (node.folder) {
         const key = node.key;
-        const nodePath = node.data.path;
 
         if (Object.keys(window.dropzoneList).indexOf(key) + 1) {
           window.dropzoneList[key].destroy();
         }
 
         window.dropzoneList[key] = new window.Dropzone(node.span, {
-          url: `/upload/?nodePath=${nodePath}`,
+          url: `/upload/`,
           createImageThumbnails: false,
           clickable: false,
           previewsContainer: false,
+          acceptedFiles: '.jpg',
 
           init: function() {
-            this.on("sending", Meteor.wrapAsync((file, xhr, formData) => {
-              formData.set('fullPath', file.fullPath);
-            }));
+            this.on('sending', function(file, xhr, formData) {
+              // the key of the node where we've just droped the file
+              formData.set('nodeKey', key);
+              // the name could be changed if in the temp folder exists file
+              // with the same name
+              formData.set('nameOrigin', file.name);
+
+              if (file.fullPath) {
+                // if we've droped the directory, then we should pass the path
+                // of it per file
+                formData.set('dirPath', pathLib.dirname(file.fullPath));
+              }
+            }).on('addedfile', function(file) {
+              if(!confirm(`Do you want to upload the file ${file.name}?`)){
+                  this.removeFile(file);
+                  return false;
+              }
+
+              return true;
+            });
           }
         });
       }
@@ -134,7 +154,7 @@ let fancyData = (source) => {
 }
 
 Template.fancytree.onCreated(function() {
-  Meteor.subscribe('hello.files');
+  Meteor.subscribe('files.tree');
 });
 
 Template.fancytree.helpers({
@@ -143,7 +163,6 @@ Template.fancytree.helpers({
     const expandedList = $tree.data('expandedList');
     const objectList = FilesTree.find({}).fetch();
     const source = fromFlatToFancySource(objectList, expandedList);
-    console.log(source)
 
     if (!expandedList) {
       try {
