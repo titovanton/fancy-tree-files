@@ -18,7 +18,6 @@ import { recursiveFolder } from './fs.api.js';
 
 export const sharedFolder = '/home/vagrant/folder';
 export const tempFolder = '/home/vagrant/temp';
-export const sharedTitle = 'folder';
 
 /**
  * Recives the document and uses parent attribute to generate path recursively.
@@ -93,15 +92,16 @@ const findOneAndUpdate = (collection, filter, update) => {
  * @return nothing
  */
 export const fromFStoDB = (path = sharedFolder, collection = FilesTree) => {
+  const shared = lib.path.basename(path);
   const affected = findOneAndUpdate(
     collection,
-    {parent: null, title: sharedTitle},
-    {parent: null, title: sharedTitle, expanded: true, folder: true}
+    {parent: null, title: shared},
+    {parent: null, title: shared, expanded: true, folder: true}
   );
 
   // maping path to mongo _id
   const parentsMap = new Object(null);
-  const sharedFolderRelative = lib.path.join('/', sharedTitle);
+  const sharedFolderRelative = lib.path.join('/', shared);
   parentsMap[sharedFolderRelative] = affected._id;
 
   // to make relative path, replace the following

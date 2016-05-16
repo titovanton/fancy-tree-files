@@ -4,7 +4,7 @@ import { Template } from 'meteor/templating';
 import './body.html';
 
 Template.body.events({
-  'click #upload'(event, instance) {
+  'click #sync'(event, instance) {
     Meteor.call('uploadCallback');
   }
 });
