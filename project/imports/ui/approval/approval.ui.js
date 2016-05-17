@@ -23,6 +23,22 @@ Template.approval.events({
     Meteor.call('approveFile', this._id, (err, res) => {
       if (err) {
         console.log(err);
+
+        if (confirm(err.reason + '.\nDo you want to create this folder?')) {
+          Meteor.call('createFolder', this._id, (err, res) => {
+            if (err) {
+              console.log(err);
+            }
+          });
+        }
+      }
+    });
+  },
+
+  'click .remove-it'() {
+    Meteor.call('removeRevision', this._id, (err, res) => {
+      if (err) {
+        console.log(err);
       }
     });
   }

@@ -1,11 +1,12 @@
 <template name="approval">
-  <h2>Approval</h2>
+  <h2>Approvals</h2>
 
   <table>
     {{#each flatList}}
       <tr>
         <td>{{dirPath}}/{{nameOrigin}}</td>
         <td><button class="approve-it">approve</button></td>
+        <td><button class="remove-it">remove</button></td>
       </tr>
     {{/each}}
   </table>
