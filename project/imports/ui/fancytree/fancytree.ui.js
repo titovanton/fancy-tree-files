@@ -86,7 +86,7 @@ let fancyData = (source) => {
           createImageThumbnails: false,
           clickable: false,
           previewsContainer: false,
-          acceptedFiles: '.jpg',
+          acceptedFiles: '.jpg,.yml,.zip',
 
           init: function() {
             this.on('sending', function(file, xhr, formData) {

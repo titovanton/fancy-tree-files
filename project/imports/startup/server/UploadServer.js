@@ -15,6 +15,7 @@ Meteor.startup(function () {
     uploadDir: tempFolder,
     uploadUrl: '/upload/',
     checkCreateDirectories: true,
+    acceptFileTypes: /\.jpg|\.png|\.yml/i,
 
     finished: function(fileInfo, formFields) {
       check(formFields.nodeKey, String);
