@@ -20,12 +20,26 @@ export const sharedFolder = '/home/vagrant/folder';
 export const tempFolder = '/home/vagrant/temp';
 
 /**
- * Find a document, which is projection to the path.basename('/path/to/folder')
+ * Find a document, which is projection
+ * to the path.basename('/path/to/folder') subdir
  * @param { String } path
  * @return { MongoObject } projection of the latest subdir
  */
-export const findByPath(path, collection = FilesTree) {
-  
+export const findDirByPath = (path, collection = FilesTree) => {
+  let parent = null;
+  const pathList = path.split('/');
+
+  pathList.forEach(function(item, index, arr) {
+    if (item) {
+      parent = collection.findOne({
+        title: item,
+        parent: parent ? parent._id : null,
+        folder: true
+      });
+    }
+  });
+
+  return parent;
 }
 
 /**

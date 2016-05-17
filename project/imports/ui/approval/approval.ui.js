@@ -28,6 +28,8 @@ Template.approval.events({
           Meteor.call('createFolder', this._id, (err, res) => {
             if (err) {
               console.log(err);
+            } else {
+              alert('The folder created. Press "approve" button again.');
             }
           });
         }

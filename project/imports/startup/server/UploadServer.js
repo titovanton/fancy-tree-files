@@ -26,7 +26,7 @@ Meteor.startup(function () {
       // original name of the file
       objToInsert.nameOrigin = formFields.nameOrigin;
       // parent document in FilesTree
-      objToInsert.parent = formFields.nodeKey;
+      // objToInsert.parent = formFields.nodeKey;
 
       // path of the node, where we've droped the file or folder
       const nodePath = relativePathOf(

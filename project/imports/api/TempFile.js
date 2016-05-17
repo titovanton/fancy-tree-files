@@ -8,6 +8,7 @@ import { check } from 'meteor/check';
 import { tempFolder } from '../fs/sync.js';
 import { sharedFolder } from '../fs/sync.js';
 import { fromFStoDB } from '../fs/sync.js';
+import { findDirByPath } from '../fs/sync.js';
 
 import { FilesTree } from './FilesTree.js';
 
@@ -40,6 +41,15 @@ if (Meteor.isServer) {
       // checking file in temp folder
       try {
         stats = fs.statSync(tempPath);
+
+        if (!stats.isFile()) {
+          // if it is not a file
+          throw new Meteor.Error(
+            'assertion error',
+            `${tempRelative} is not a file`,
+            'method approveFile'
+          );
+        }
       } catch(e) {
         // does not exist
         if (e.code == 'ENOENT') {
@@ -51,18 +61,18 @@ if (Meteor.isServer) {
         }
       }
 
-      if (!stats.isFile()) {
-        // if it is not a file
-        throw new Meteor.Error(
-          'assertion error',
-          `${tempRelative} is not a file`,
-          'method approveFile'
-        );
-      }
-
       // checking existence of the destination folder
       try {
         stats = fs.statSync(newPathDir);
+
+        if (!stats.isDirectory()) {
+          // if it is not a folder
+          throw new Meteor.Error(
+            'assertion error',
+            `[${doc.dirPath}] is not a directory`,
+            'method approveFile'
+          );
+        }
       } catch(e) {
         // does not exist
         if (e.code == 'ENOENT') {
@@ -72,15 +82,6 @@ if (Meteor.isServer) {
             'method approveFile'
           );
         }
-      }
-
-      if (!stats.isDirectory()) {
-        // if it is not a folder
-        throw new Meteor.Error(
-          'assertion error',
-          `[${doc.dirPath}] is not a directory`,
-          'method approveFile'
-        );
       }
 
       // checking existence of moving file in the destination folder
@@ -102,15 +103,14 @@ if (Meteor.isServer) {
       // moving the file from temp folder to shared
       fs.renameSync(tempPath, newPath);
 
-      // TODO: find the parent in FilesTree
-      // doc.dirPath
+      // find the parent in FilesTree
+      const parent = findDirByPath(doc.dirPath);
 
       // updating the FilesTree to make a reaction on the Client
-
       FilesTree.insert({
         title: doc.nameOrigin,
         expanded: false,
-        parent: doc.parent,
+        parent: parent._id,
         folder: false
       });
 
