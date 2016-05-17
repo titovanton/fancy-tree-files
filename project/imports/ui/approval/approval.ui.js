@@ -22,9 +22,15 @@ Template.approval.events({
   'click .approve-it'() {
     Meteor.call('approveFile', this._id, (err, res) => {
       if (err) {
-        console.log(err);
+        // console.log(err);
 
-        if (confirm(err.reason + '.\nDo you want to create this folder?')) {
+        const errMsg1 = err.reason +
+          '.\nDo you want to create this folder?';
+        const errMsg2 = err.reason +
+          '.\nDo you want to replace it with the new one?';
+
+        if (err.error == 'DIR_ERR' && confirm(errMsg1)) {
+          // create folder if the user wants that
           Meteor.call('createFolder', this._id, (err, res) => {
             if (err) {
               console.log(err);
@@ -32,6 +38,9 @@ Template.approval.events({
               alert('The folder created. Press "approve" button again.');
             }
           });
+        } else if (err.error == 'FILE_ERR' && confirm(errMsg2)) {
+          // replace existence file with the new one
+          console.log('replace');
         }
       }
     });

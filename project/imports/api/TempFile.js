@@ -41,15 +41,6 @@ if (Meteor.isServer) {
       // checking file in temp folder
       try {
         stats = fs.statSync(tempPath);
-
-        if (!stats.isFile()) {
-          // if it is not a file
-          throw new Meteor.Error(
-            'assertion error',
-            `${tempRelative} is not a file`,
-            'method approveFile'
-          );
-        }
       } catch(e) {
         // does not exist
         if (e.code == 'ENOENT') {
@@ -61,27 +52,36 @@ if (Meteor.isServer) {
         }
       }
 
+      if (!stats.isFile()) {
+        // if it is not a file
+        throw new Meteor.Error(
+          'assertion error',
+          `${tempRelative} is not a file`,
+          'method approveFile'
+        );
+      }
+
       // checking existence of the destination folder
       try {
         stats = fs.statSync(newPathDir);
-
-        if (!stats.isDirectory()) {
-          // if it is not a folder
-          throw new Meteor.Error(
-            'assertion error',
-            `[${doc.dirPath}] is not a directory`,
-            'method approveFile'
-          );
-        }
       } catch(e) {
         // does not exist
         if (e.code == 'ENOENT') {
           throw new Meteor.Error(
-            'ENOENT1',
+            'DIR_ERR',
             `Directory [${doc.dirPath}] does not exist`,
             'method approveFile'
           );
         }
+      }
+
+      if (!stats.isDirectory()) {
+        // if it is not a folder
+        throw new Meteor.Error(
+          'assertion error',
+          `[${doc.dirPath}] is not a directory`,
+          'method approveFile'
+        );
       }
 
       // checking existence of moving file in the destination folder
@@ -89,16 +89,16 @@ if (Meteor.isServer) {
 
       try {
         stats = fs.statSync(newPath);
-
-        // checking existing object for is a file:
-        if (stats.isFile()) {
-          throw new Meteor.Error(
-            'assertion error',
-            `File [${doc.nameOrigin}] already exists in [${doc.dirPath}] folder`,
-            'method approveFile'
-          );
-        }
       } catch(e) {}
+
+      // checking existing object for is a file:
+      if (stats && stats.isFile()) {
+        throw new Meteor.Error(
+          'FILE_ERR',
+          `File [${doc.nameOrigin}] already exists in [${doc.dirPath}] folder`,
+          'method approveFile'
+        );
+      }
 
       // moving the file from temp folder to shared
       fs.renameSync(tempPath, newPath);
@@ -107,6 +107,7 @@ if (Meteor.isServer) {
       const parent = findDirByPath(doc.dirPath);
 
       // updating the FilesTree to make a reaction on the Client
+
       FilesTree.insert({
         title: doc.nameOrigin,
         expanded: false,
