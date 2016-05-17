@@ -20,6 +20,10 @@ Template.approval.helpers({
 
 Template.approval.events({
   'click .approve-it'() {
-    Meteor.call('approveFile', this._id);
+    Meteor.call('approveFile', this._id, (err, res) => {
+      if (err) {
+        console.log(err);
+      }
+    });
   }
 });

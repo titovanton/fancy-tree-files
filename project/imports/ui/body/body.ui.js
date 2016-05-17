@@ -5,6 +5,6 @@ import './body.html';
 
 Template.body.events({
   'click #sync'(event, instance) {
-    Meteor.call('uploadCallback');
+    Meteor.call('syncFs');
   }
 });
