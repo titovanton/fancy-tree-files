@@ -123,15 +123,15 @@ let fancyData = (source) => {
           init: function() {
             this.on('sending', function(file, xhr, formData) {
               // the key of the node where we've just droped the file
-              formData.set('nodeKey', key);
+              formData.append('nodeKey', key);
               // the name could be changed if in the temp folder exists file
               // with the same name
-              formData.set('nameOrigin', file.name);
+              formData.append('nameOrigin', file.name);
 
               if (file.fullPath) {
                 // if we've droped the directory, then we should pass the path
                 // of it per file
-                formData.set('dirPath', pathLib.dirname(file.fullPath));
+                formData.append('dirPath', pathLib.dirname(file.fullPath));
               }
             }).on('addedfile', function(file) {
               if(!confirm(`Do you want to upload the file ${file.name}?`)){
