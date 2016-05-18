@@ -13,5 +13,5 @@ Package.describe({
 Package.onUse(function(api) {
   api.versionsFrom('1.3.1');
   api.use('titovanton:dropzone');
-  api.addFiles('dropzone-startup.js', 'client');
+  api.mainModule('dropzone-startup.js', 'client');
 });
