@@ -12,7 +12,7 @@ const lib = {
 
 import { Meteor } from 'meteor/meteor';
 
-import { FilesTree } from '../api/FilesTree.js';
+import { FilesTree } from '../api/FilesTree.db.js';
 
 import { recursiveFolder } from './fs.api.js';
 

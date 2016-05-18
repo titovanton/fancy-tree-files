@@ -4,9 +4,9 @@ import { Meteor } from 'meteor/meteor';
 import { Template } from 'meteor/templating';
 import { check } from 'meteor/check';
 
-import { TempFile } from '../../api/TempFile.js';
+import { TempFile } from '../../api/TempFile.db.js';
 
-import './approval.html'
+import './approval.tpl.html'
 
 Template.approval.onCreated(function() {
   Meteor.subscribe('temp.file');

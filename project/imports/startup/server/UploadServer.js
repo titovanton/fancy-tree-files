@@ -1,11 +1,11 @@
 import { Meteor } from 'meteor/meteor';
 import { check } from 'meteor/check';
 
-import { tempFolder } from '../../fs/sync.js';
-import { relativePathOf } from '../../fs/sync.js';
+import { tempFolder } from '../../api/sync.api.js';
+import { relativePathOf } from '../../api/sync.api.js';
 
-import { FilesTree } from '../../api/FilesTree.js';
-import { TempFile } from '../../api/TempFile.js';
+import { FilesTree } from '../../api/FilesTree.db.js';
+import { TempFile } from '../../api/TempFile.db.js';
 
 const pathLib = require('path');
 

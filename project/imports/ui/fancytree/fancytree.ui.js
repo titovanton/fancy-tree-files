@@ -5,9 +5,9 @@ import { Session } from 'meteor/session'
 import { Template } from 'meteor/templating';
 import { check } from 'meteor/check';
 
-import { FilesTree } from '../../api/FilesTree.js';
+import { FilesTree } from '../../api/FilesTree.db.js';
 
-import './fancytree.html'
+import './fancytree.tpl.html'
 
 // Non reactive get method
 Session.getNonReactive = function (key) {

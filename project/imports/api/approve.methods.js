@@ -1,24 +1,18 @@
-const path = require('path');
-const fs = require('fs');
+const pathLib = require('path');
+const fslib = require('fs');
 
 import { Meteor } from 'meteor/meteor';
-import { Mongo } from 'meteor/mongo';
 import { check } from 'meteor/check';
 
-import { tempFolder } from '../fs/sync.js';
-import { sharedFolder } from '../fs/sync.js';
-import { fromFStoDB } from '../fs/sync.js';
-import { findDirByPath } from '../fs/sync.js';
+import { TempFile } from './TempFile.db.js';
+import { FilesTree } from './FilesTree.db.js';
 
-import { FilesTree } from './FilesTree.js';
-
-export const TempFile = new Mongo.Collection('TempFile');
+import { tempFolder } from '../api/sync.api.js';
+import { sharedFolder } from '../api/sync.api.js';
+import { fromFStoDB } from '../api/sync.api.js';
+import { findDirByPath } from '../api/sync.api.js';
 
 if (Meteor.isServer) {
-  Meteor.publish('temp.file', function filesTreePublication() {
-    return TempFile.find( {});
-  });
-
   Meteor.methods({
     approveFile(docId) {
       check(docId, String);
@@ -33,14 +27,14 @@ if (Meteor.isServer) {
         );
       }
 
-      const tempPath = path.join(tempFolder, doc.name);
-      const tempRelative = path.join('temp', doc.name);
-      const newPathDir = path.join(path.dirname(sharedFolder), doc.dirPath);
+      const tempPath = pathLib.join(tempFolder, doc.name);
+      const tempRelative = pathLib.join('temp', doc.name);
+      const newPathDir = pathLib.join(pathLib.dirname(sharedFolder), doc.dirPath);
       let stats = null;
 
       // checking file in temp folder
       try {
-        stats = fs.statSync(tempPath);
+        stats = fslib.statSync(tempPath);
       } catch(e) {
         // does not exist
         if (e.code == 'ENOENT') {
@@ -63,7 +57,7 @@ if (Meteor.isServer) {
 
       // checking existence of the destination folder
       try {
-        stats = fs.statSync(newPathDir);
+        stats = fslib.statSync(newPathDir);
       } catch(e) {
         // does not exist
         if (e.code == 'ENOENT') {
@@ -85,10 +79,10 @@ if (Meteor.isServer) {
       }
 
       // checking existence of moving file in the destination folder
-      const newPath = path.join(newPathDir, doc.nameOrigin);
+      const newPath = pathLib.join(newPathDir, doc.nameOrigin);
 
       try {
-        stats = fs.statSync(newPath);
+        stats = fslib.statSync(newPath);
       } catch(e) {}
 
       // checking existing object for is a file:
@@ -101,13 +95,12 @@ if (Meteor.isServer) {
       }
 
       // moving the file from temp folder to shared
-      fs.renameSync(tempPath, newPath);
+      fslib.renameSync(tempPath, newPath);
 
       // find the parent in FilesTree
       const parent = findDirByPath(doc.dirPath);
 
       // updating the FilesTree to make a reaction on the Client
-
       FilesTree.insert({
         title: doc.nameOrigin,
         expanded: false,
@@ -132,11 +125,11 @@ if (Meteor.isServer) {
         );
       }
 
-      const tempPath = path.join(tempFolder, doc.name);
+      const tempPath = pathLib.join(tempFolder, doc.name);
 
       // does not metter is there a file or not, we will try to delete it
       try {
-        fs.unlinkSync(tempPath);
+        fslib.unlinkSync(tempPath);
       } catch(e) {}
 
       // removing temp document
@@ -157,47 +150,19 @@ if (Meteor.isServer) {
       }
 
       // 1t stage: initiating
-      const basenameShared = path.basename(sharedFolder);
+      const basenameShared = pathLib.basename(sharedFolder);
       let dirs = doc.dirPath.split('/');
-      let currentDir = path.dirname(sharedFolder);
+      let currentDir = pathLib.dirname(sharedFolder);
       let parent = null;
-      // let parent = FilesTree.findOne({
-      //   title: basenameShared,
-      //   parent: null,
-      //   folder: true
-      // });
-      //
-      // // sync FS and DB
-      // if (!parent) {
-      //   fromFStoDB();
-      // }
-      //
-      // // lets try one more time
-      // parent = FilesTree.findOne({
-      //   title: basenameShared,
-      //   parent: null,
-      //   folder: true
-      // });
-      //
-      // // finnal error throw
-      // if (!parent) {
-      //   throw new Meteor.Error(
-      //     'assertion error',
-      //     'A document with finding query ' +
-      //     `{title: ${basenameShared}, ` +
-      //     'parent: null, folder: true} does not exist',
-      //     'method createFolder'
-      //   );
-      // }
 
       // 2d stage: create all directories from root to latest subdir
       dirs.forEach(function(item, index, arr) {
         if (item) {
           let stats = null;
-          currentDir = path.join(currentDir, item);
+          currentDir = pathLib.join(currentDir, item);
 
           const createIt = function() {
-            fs.mkdirSync(currentDir, '775');
+            fslib.mkdirSync(currentDir, '775');
 
             // updating the FilesTree to make a reaction on the Client
             FilesTree.insert({
@@ -209,7 +174,7 @@ if (Meteor.isServer) {
           }
 
           try {
-            stats = fs.statSync(currentDir);
+            stats = fslib.statSync(currentDir);
 
             if (!stats.isDirectory()) {
               createIt();
@@ -230,7 +195,6 @@ if (Meteor.isServer) {
           });
         }
       });
-
     }
   })
 }

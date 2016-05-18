@@ -6,12 +6,12 @@ const lib = {
 import { Meteor } from 'meteor/meteor';
 import { check } from 'meteor/check';
 
-import { fromFStoDB } from '../fs/sync.js';
-import { fromDBtoFS } from '../fs/sync.js';
-import { sharedFolder } from '../fs/sync.js';
-import { relativePathOf } from '../fs/sync.js';
-import { absPathOf } from '../fs/sync.js';
-import { FilesTree } from '../api/FilesTree.js';
+import { fromFStoDB } from '../api/sync.api.js';
+import { fromDBtoFS } from '../api/sync.api.js';
+import { sharedFolder } from '../api/sync.api.js';
+import { relativePathOf } from '../api/sync.api.js';
+import { absPathOf } from '../api/sync.api.js';
+import { FilesTree } from '../api/FilesTree.db.js';
 
 Meteor.methods({
   syncFs() {
@@ -61,41 +61,3 @@ Meteor.methods({
     lib.fs.renameSync(oldPath, newPath);
   }
 });
-
-// TODO: needs to be done
-const renameExists = () => {
-
-    /** Auto rename a file if the same name exists in a destination folder
-     * example: file.txt, file(1).txt, file(2).txt
-     */
-    // while (exists) {
-    //   let filename = exists.title;
-    //   let copyNumber = 1;
-    //   let ext = '';
-    //
-    //   // extract extantion
-    //   let matches = filename.match(/^(.+)([.][^.]+)$/);
-    //
-    //   if (matches) {
-    //     filename = matches[1];
-    //     ext = matches[2];
-    //   }
-    //
-    //   // extract copy number
-    //   matches = filename.match(/^(.+)\((\d+)\)$/);
-    //
-    //   if (matches) {
-    //     filename = matches[1];
-    //     copyNumber = parseInt(matches[2]) + 1;
-    //   }
-    //
-    //   // copyNumber = parseInt(copyNumber) + 1;
-    //   nodeFrom.title = `${filename}(${copyNumber})${ext}`;
-    //
-    //   exists = FilesTree.findOne({
-    //     parent: nodeTo._id,
-    //     title: nodeFrom.title,
-    //     folder: nodeFrom.folder
-    //   });
-    // }
-}
