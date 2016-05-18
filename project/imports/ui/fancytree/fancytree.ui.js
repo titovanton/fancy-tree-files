@@ -1,6 +1,7 @@
 const pathLib = require('path');
 
 import { Meteor } from 'meteor/meteor';
+import { Session } from 'meteor/session'
 import { Template } from 'meteor/templating';
 import { check } from 'meteor/check';
 
@@ -8,9 +9,15 @@ import { FilesTree } from '../../api/FilesTree.js';
 
 import './fancytree.html'
 
-let fromFlatToFancySource = function(childList, expandedList = []) {
+// Non reactive get method
+Session.getNonReactive = function (key) {
+  return Tracker.nonreactive(function () { return Session.get(key); });
+};
+
+let fromFlatToFancySource = function(childList) {
   let parent;
   let nodeMap = {};
+  const expandedKeys = Session.getNonReactive('expandedKeys') || [];
 
   // Pass 1: store all items in reference map
   $.each(childList, function(index, child) {
@@ -23,18 +30,16 @@ let fromFlatToFancySource = function(childList, expandedList = []) {
     }
 
     delete child._id;
+
+    // expanded
+    const expanded = expandedKeys.indexOf(child.key) >= 0;
+    child.expanded = child.expanded || expanded;
+
     nodeMap[child.key] = child;
-    // child.extraClasses = `key-${child.key}`;
-    // nodeMap[child.path] = child;
   });
 
   // Pass 2: adjust fields and fix child structure
   childList = $.map(childList, function(child) {
-    // asigne expanded
-    // if ( expandedList.indexOf(child.key) >= 0 ) {
-    //   child.expanded = true;
-    // }
-
     // Check if it is a child node
     if (child.parent) {
 
@@ -61,7 +66,8 @@ let fromFlatToFancySource = function(childList, expandedList = []) {
 let fancyData = (source) => {
   return {
     source: source,
-    extensions: ['dnd', 'filter', 'persist'],
+    // extensions: ['dnd', 'filter', 'persist'],
+    extensions: ['dnd', 'filter'],
     toggleEffect: false,
 
     persist: {
@@ -69,7 +75,33 @@ let fancyData = (source) => {
       types: 'expanded'
     },
 
-    createNode: function(event, data) {
+    click(event, data) {
+      const node = data.node;
+      let keys = Session.get('expandedKeys');
+
+      // custom persist implementation
+      if (!keys) {
+        // first use
+        Session.set('expandedKeys', []);
+        keys = [];
+      }
+
+      if (node.expanded) {
+        // we've closed the folder
+         const index = keys.indexOf(node.key);
+
+         if (index >= 0) {
+           keys.splice(index, 1);
+         }
+      } else {
+        // we've opened the folder
+        keys.push(node.key);
+      }
+
+      Session.set('expandedKeys', keys);
+    },
+
+    createNode(event, data) {
       const node = data.node;
 
       // create Dropzone objects for every folder
@@ -112,6 +144,11 @@ let fancyData = (source) => {
           }
         });
       }
+    },
+
+    create(event, data) {
+      // runs on tree render complited (only once on init)
+      $(event.target).data('isCreated', true);
     },
 
     dnd: {
@@ -160,23 +197,18 @@ Template.fancytree.onCreated(function() {
 Template.fancytree.helpers({
   reloadFancyTree() {
     const $tree = $('#tree');
-    const expandedList = $tree.data('expandedList');
+    // on fancytree 'create' event
+    const isCreated = $tree.data('isCreated');
     const objectList = FilesTree.find({}).fetch();
-    const source = fromFlatToFancySource(objectList, expandedList);
+    const source = fromFlatToFancySource(objectList);
 
-    if (!expandedList) {
-      try {
-        $tree.fancytree(fancyData(source));
-      } catch (e) {}
-
-      $tree.data('expandedList', []);
-    } else {
-      const tree = $tree.fancytree('getTree');
-
-      try {
-        tree.reload(source);
-      } catch (e) {}
+    if (isCreated) {
+      $tree.fancytree('destroy');
     }
+
+    try {
+      $tree.fancytree(fancyData(source));
+    } catch (e) {}
   }
 });
 
