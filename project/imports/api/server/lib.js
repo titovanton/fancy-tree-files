@@ -3,21 +3,56 @@
  * You should think about it like a library, there are no invocations here.
  */
 
-// namespace for the libraries
-const lib = {
-  fs: require('fs'),
-  path: require('path')
-  // chokidar: require('chokidar')
-};
+fsLib = require('fs');
+pathLib = require('path');
 
 import { Meteor } from 'meteor/meteor';
 
-import { FilesTree } from '../api/FilesTree.db.js';
-
-import { recursiveFolder } from './fs.api.js';
+import { FilesTree } from '../files.api.js';
 
 export const sharedFolder = '/home/vagrant/folder';
 export const tempFolder = '/home/vagrant/temp';
+
+/**
+ * Recursive listing of all files inside path
+ * and all files inside of all folders and so on...
+ * But using stack algorithm instead recursion, which uses less RAM.
+ * About fs.Stats:
+ * https://nodejs.org/api/fs.html#fs_class_fs_stats
+ * @param path - path to root folder
+ * @param fn - callback function
+ * @return nothing.
+ * Expected parameters of the callback functin:
+ * @param name - the name of file or directory
+ * @param absPath - the absolute path to
+ * @param dirPath - the absolute path to parent dir
+ * @param statsObj - result of fs.statSync
+ */
+export const recursiveFolder = (path, fn) => {
+  // current dir path
+  let dirPath = path;
+  // stack of dir path
+  let dirStack = [];
+
+  while (dirPath) {
+    // like $ ls -a
+    const list = fsLib.readdirSync(dirPath);
+
+    list.forEach((name, i, lst) => {
+      const absPath = pathLib.join(dirPath, name);
+      // posix attributes
+      const statsObj = fsLib.statSync(absPath);
+
+      if (statsObj.isDirectory()) {
+        dirStack.push(absPath);
+      }
+
+      fn(name, absPath, dirPath, statsObj);
+    });
+
+    dirPath = dirStack.pop();
+  }
+}
 
 /**
  * Find a document, which is projection
@@ -54,7 +89,7 @@ export const relativePathOf = (document, collection = null, documentsMap = null)
     throw Meteor.Error('collection and documentsMap can not be null both.');
   }
 
-  let relativePath = lib.path.join('/', document.title);
+  let relativePath = pathLib.join('/', document.title);
   let tmp = document;
 
   while (tmp.parent) {
@@ -64,7 +99,7 @@ export const relativePathOf = (document, collection = null, documentsMap = null)
       tmp = collection.findOne({_id: tmp.parent});
     }
 
-    relativePath = lib.path.join('/', tmp.title, relativePath);
+    relativePath = pathLib.join('/', tmp.title, relativePath);
   }
 
   return relativePath;
@@ -78,8 +113,8 @@ export const relativePathOf = (document, collection = null, documentsMap = null)
  * @return { String } absolute path
  */
 export const absPathOf = (document, collection = null, documentsMap = null) => {
-  return lib.path.join(
-    lib.path.dirname(sharedFolder),
+  return pathLib.join(
+    pathLib.dirname(sharedFolder),
     relativePathOf(document, collection, documentsMap)
   );
 }
@@ -115,7 +150,7 @@ const findOneAndUpdate = (collection, filter, update) => {
  * @return nothing
  */
 export const fromFStoDB = (path = sharedFolder, collection = FilesTree) => {
-  const shared = lib.path.basename(path);
+  const shared = pathLib.basename(path);
   const affected = findOneAndUpdate(
     collection,
     {parent: null, title: shared},
@@ -124,16 +159,16 @@ export const fromFStoDB = (path = sharedFolder, collection = FilesTree) => {
 
   // maping path to mongo _id
   const parentsMap = new Object(null);
-  const sharedFolderRelative = lib.path.join('/', shared);
+  const sharedFolderRelative = pathLib.join('/', shared);
   parentsMap[sharedFolderRelative] = affected._id;
 
   // to make relative path, replace the following
-  const absReplace = lib.path.dirname(path);
+  const absReplace = pathLib.dirname(path);
 
   recursiveFolder(path, (name, absPath, parentDir, statsObj) => {
     // Object {title, parent, folder, expanded}
     let fileObj = Object.create(null);
-    // const parent = lib.path.dirname(absPath).replace(path, '');
+    // const parent = pathLib.dirname(absPath).replace(path, '');
     const parentPath = parentDir.replace(absReplace, '');
 
     fileObj.title = name;
@@ -169,7 +204,7 @@ export const fromDBtoFS = (path = sharedFolder, collection = FilesTree) => {
     documentsMap[item._id] = item;
   });
 
-  const pathParent = lib.path.dirname(path);
+  const pathParent = pathLib.dirname(path);
 
   // gousts checking
   allDocuments.forEach((item, i, arr) => {
@@ -177,7 +212,7 @@ export const fromDBtoFS = (path = sharedFolder, collection = FilesTree) => {
 
     // posix attributes
     try {
-      lib.fs.statSync(absPath);
+      fsLib.statSync(absPath);
     } catch (err) {
 
       // does not exist
@@ -185,75 +220,5 @@ export const fromDBtoFS = (path = sharedFolder, collection = FilesTree) => {
         collection.remove({_id: item._id});
       }
     }
-  });
-}
-
-/**
- * While fs lib does not support good watch method:
- * https://nodejs.org/api/fs.html#fs_caveats
- * we have to use(on Linux) inotify-tools and node api to that(chokidar):
- * https://github.com/paulmillr/chokidar
- * This function runs watcher on the folder and binds change events recursively.
- * @param folderPath a string argument
- * @param collection an collection object
- * @return nothing
- */
-export const watcher = (folderPath = sharedFolder, collection = FilesTree) => {
-  const watcher = lib.chokidar.watch(folderPath, {ignored: /[\/\\]\./});
-  // while .on method is async, it is required to wrapp method with Meteor.wrapAsync
-  const onSync = Meteor.wrapAsync(watcher.on, watcher);
-
-  onSync('addDir', (path, stats) => {
-    // Object {name, parent, path}
-    let fileObj = Object.create(null);
-
-    fileObj.title = lib.path.basename(path);
-
-    if (folderPath == path) {
-      fileObj.path = '/';
-      fileObj.expanded = true;
-    } else {
-      fileObj.path = path.replace(folderPath, '');
-      const parent = lib.path.dirname(path);
-
-      if (folderPath == parent) {
-        fileObj.parent = '/';
-      } else {
-        fileObj.parent = parent.replace(folderPath, '');
-      }
-    }
-
-    fileObj.folder = true;
-
-    const updatedId = collection.upsert(
-      {path: fileObj.path},
-      fileObj
-    );
-  });
-
-  onSync('add', (path, stats) => {
-    // Object {name, parent, path}
-    let fileObj = Object.create(null);
-
-    fileObj.title = lib.path.basename(path);
-    fileObj.path = path.replace(folderPath, '');
-    const parent = lib.path.dirname(path);
-
-    if (folderPath == parent) {
-      fileObj.parent = '/';
-    } else {
-      fileObj.parent = parent.replace(folderPath, '');
-    }
-
-    fileObj.folder = false;
-
-    const updatedId = collection.upsert(
-      {path: fileObj.path},
-      fileObj
-    );
-  });
-
-  onSync('unlink', (path, stats) => {
-    collection.remove({path: path.replace(folderPath, '')});
   });
 }

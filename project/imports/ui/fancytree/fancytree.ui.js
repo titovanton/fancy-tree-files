@@ -5,7 +5,7 @@ import { Session } from 'meteor/session'
 import { Template } from 'meteor/templating';
 import { check } from 'meteor/check';
 
-import { FilesTree } from '../../api/FilesTree.db.js';
+import { FilesTree } from '../../api/files.api.js';
 
 import './fancytree.tpl.html'
 
@@ -14,7 +14,7 @@ Session.getNonReactive = function (key) {
   return Tracker.nonreactive(function () { return Session.get(key); });
 };
 
-let fromFlatToFancySource = function(childList) {
+const fromFlatToFancySource = function(childList) {
   let parent;
   let nodeMap = {};
   const expandedKeys = Session.getNonReactive('expandedKeys') || [];
@@ -63,17 +63,17 @@ let fromFlatToFancySource = function(childList) {
   return childList;
 }
 
-let fancyData = (source) => {
+const fancyData = (source) => {
   return {
     source: source,
     // extensions: ['dnd', 'filter', 'persist'],
     extensions: ['dnd', 'filter'],
     toggleEffect: false,
 
-    persist: {
-      expandLazy: false,
-      types: 'expanded'
-    },
+    // persist: {
+    //   expandLazy: false,
+    //   types: 'expanded'
+    // },
 
     click(event, data) {
       const node = data.node;

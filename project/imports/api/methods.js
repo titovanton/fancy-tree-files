@@ -1,19 +1,72 @@
-const pathLib = require('path');
-const fslib = require('fs');
+fsLib = require('fs');
 
 import { Meteor } from 'meteor/meteor';
 import { check } from 'meteor/check';
 
-import { TempFile } from './TempFile.db.js';
-import { FilesTree } from './FilesTree.db.js';
+import { absPathOf } from './server/lib.js';
+import { findDirByPath } from './server/lib.js';
+import { fromDBtoFS } from './server/lib.js';
+import { fromFStoDB } from './server/lib.js';
+import { relativePathOf } from './server/lib.js';
+import { sharedFolder } from './server/lib.js';
+import { tempFolder } from './server/lib.js';
 
-import { tempFolder } from '../api/sync.api.js';
-import { sharedFolder } from '../api/sync.api.js';
-import { fromFStoDB } from '../api/sync.api.js';
-import { findDirByPath } from '../api/sync.api.js';
+import { FilesTree } from './files.api.js';
+import { TempFile } from './files.api.js';
+
 
 if (Meteor.isServer) {
   Meteor.methods({
+    syncFs() {
+      fromFStoDB();
+      fromDBtoFS();
+    },
+
+    /**
+     * Move file using dnd on the client
+     */
+    mv(keyNodeFrom, keyNodeTo) {
+      check(keyNodeTo, String);
+      check(keyNodeFrom, String);
+
+      // retrieving
+      const nodeFrom = FilesTree.findOne({_id: keyNodeFrom});
+      const nodeTo = FilesTree.findOne({_id: keyNodeTo});
+
+      // you can't move to not a folder
+      if (!nodeTo.folder) {
+        throw new Meteor.Error(`The "${nodeTo.title}" should be a folder`);
+      }
+
+      let exists = FilesTree.findOne({
+        parent: nodeTo._id,
+        title: nodeFrom.title,
+        folder: nodeFrom.folder
+      });
+
+      // you can't move if the same object with the same name exists in where you
+      // moving it
+      if (exists) {
+        const pathToExists = relativePathOf(exists, FilesTree);
+
+        throw new Meteor.Error(
+          `The file "${pathToExists}" exists. ` +
+          `Rename file first before moving.`
+        );
+      }
+
+      const oldPath = absPathOf(nodeFrom, FilesTree);
+
+      // update DB first
+      nodeFrom.parent = nodeTo._id;
+      FilesTree.update({_id: nodeFrom._id}, nodeFrom);
+
+      const newPath = absPathOf(nodeFrom, FilesTree);
+
+      // moving in File Syste
+      fsLib.renameSync(oldPath, newPath);
+    },
+
     approveFile(docId) {
       check(docId, String);
 
@@ -34,7 +87,7 @@ if (Meteor.isServer) {
 
       // checking file in temp folder
       try {
-        stats = fslib.statSync(tempPath);
+        stats = fsLib.statSync(tempPath);
       } catch(e) {
         // does not exist
         if (e.code == 'ENOENT') {
@@ -57,7 +110,7 @@ if (Meteor.isServer) {
 
       // checking existence of the destination folder
       try {
-        stats = fslib.statSync(newPathDir);
+        stats = fsLib.statSync(newPathDir);
       } catch(e) {
         // does not exist
         if (e.code == 'ENOENT') {
@@ -82,7 +135,7 @@ if (Meteor.isServer) {
       const newPath = pathLib.join(newPathDir, doc.nameOrigin);
 
       try {
-        stats = fslib.statSync(newPath);
+        stats = fsLib.statSync(newPath);
       } catch(e) {}
 
       // checking existing object for is a file:
@@ -95,7 +148,7 @@ if (Meteor.isServer) {
       }
 
       // moving the file from temp folder to shared
-      fslib.renameSync(tempPath, newPath);
+      fsLib.renameSync(tempPath, newPath);
 
       // find the parent in FilesTree
       const parent = findDirByPath(doc.dirPath);
@@ -129,7 +182,7 @@ if (Meteor.isServer) {
 
       // does not metter is there a file or not, we will try to delete it
       try {
-        fslib.unlinkSync(tempPath);
+        fsLib.unlinkSync(tempPath);
       } catch(e) {}
 
       // removing temp document
@@ -162,7 +215,7 @@ if (Meteor.isServer) {
           currentDir = pathLib.join(currentDir, item);
 
           const createIt = function() {
-            fslib.mkdirSync(currentDir, '775');
+            fsLib.mkdirSync(currentDir, '775');
 
             // updating the FilesTree to make a reaction on the Client
             FilesTree.insert({
@@ -174,7 +227,7 @@ if (Meteor.isServer) {
           }
 
           try {
-            stats = fslib.statSync(currentDir);
+            stats = fsLib.statSync(currentDir);
 
             if (!stats.isDirectory()) {
               createIt();
@@ -196,5 +249,5 @@ if (Meteor.isServer) {
         }
       });
     }
-  })
+  });
 }
