@@ -8,7 +8,7 @@ pathLib = require('path');
 
 import { Meteor } from 'meteor/meteor';
 
-import { FilesTree } from '../files.api.js';
+import { FilesTree } from '../files.db.js';
 
 export const sharedFolder = '/home/vagrant/folder';
 export const tempFolder = '/home/vagrant/temp';

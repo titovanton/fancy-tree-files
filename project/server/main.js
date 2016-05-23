@@ -1,3 +1,3 @@
-import '../imports/api/files.api.js';
-import '../imports/api/methods.js';
+import '../imports/api/files.db.js';
+import '../imports/api/files.methods.js';
 import '../imports/startup/server/UploadServer.js';

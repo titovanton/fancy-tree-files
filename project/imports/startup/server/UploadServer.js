@@ -4,8 +4,8 @@ import { check } from 'meteor/check';
 import { tempFolder } from '../../api/server/lib.js';
 import { relativePathOf } from '../../api/server/lib.js';
 
-import { FilesTree } from '../../api/files.api.js';
-import { TempFile } from '../../api/files.api.js';
+import { FilesTree } from '../../api/files.db.js';
+import { TempFile } from '../../api/files.db.js';
 
 const pathLib = require('path');
 
