@@ -11,8 +11,8 @@ import { relativePathOf } from './server/lib.js';
 import { sharedFolder } from './server/lib.js';
 import { tempFolder } from './server/lib.js';
 
-import { FilesTree } from './files.api.js';
-import { TempFile } from './files.api.js';
+import { FilesTree } from './files.db.js';
+import { TempFile } from './files.db.js';
 
 
 if (Meteor.isServer) {
