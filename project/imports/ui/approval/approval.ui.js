@@ -4,7 +4,7 @@ import { Meteor } from 'meteor/meteor';
 import { Template } from 'meteor/templating';
 import { check } from 'meteor/check';
 
-import { TempFile } from '../../api/files.api.js';
+import { TempFile } from '../../api/files.db.js';
 
 import './approval.tpl.html'
 

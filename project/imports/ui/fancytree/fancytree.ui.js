@@ -5,7 +5,7 @@ import { Session } from 'meteor/session'
 import { Template } from 'meteor/templating';
 import { check } from 'meteor/check';
 
-import { FilesTree } from '../../api/files.api.js';
+import { FilesTree } from '../../api/files.db.js';
 
 import './fancytree.tpl.html'
 
